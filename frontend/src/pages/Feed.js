@@ -1,30 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const Feed = () => {
+function Feed() {
   const [posts, setPosts] = useState([]);
-  const [sortType, setSortType] = useState('latest');
 
-  const fetchPosts = async (type) => {
+  // Fetch posts from backend
+  const fetchPosts = async (sort = 'latest') => {
     try {
-      const res = await axios.get(
-        `http://localhost:1049/api/posts?sort=${type}`
-      );
+      const res = await axios.get(`http://localhost:1049/api/posts?sort=${sort}`);
       setPosts(res.data);
-      setSortType(type);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    fetchPosts('latest');
+    fetchPosts(); // default fetch latest posts
   }, []);
 
   return (
-    <div style={{ width: '60%', margin: 'auto' }}>
-      
-      {/* SORT BUTTONS */}
+    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Community Feed</h2>
+
       <div style={{ marginBottom: '20px', textAlign: 'center' }}>
         <button onClick={() => fetchPosts('latest')}>Latest</button>
         <button onClick={() => fetchPosts('popular')} style={{ marginLeft: '10px' }}>
@@ -32,27 +29,29 @@ const Feed = () => {
         </button>
       </div>
 
-      {/* POSTS */}
-      {posts.map((post) => (
-        <div
-          key={post._id}
-          style={{
-            border: '1px solid #ccc',
-            padding: '15px',
-            marginBottom: '10px',
-            borderRadius: '5px'
-          }}
-        >
-          <p><strong>Post:</strong> {post.content}</p>
-          <p>👍 Likes: {post.likesCount}</p>
-          <p>
-            🕒 Updated:{' '}
-            {new Date(post.updatedAt).toLocaleString()}
-          </p>
-        </div>
-      ))}
+      {posts.length === 0 ? (
+        <p>No posts found.</p>
+      ) : (
+        posts.map((post) => (
+          <div
+            key={post._id}
+            style={{
+              border: '1px solid #ccc',
+              borderRadius: '5px',
+              padding: '10px',
+              marginBottom: '10px',
+            }}
+          >
+            <p>{post.content}</p>
+            <small>
+              Likes: {post.likesCount} | Comments: {post.commentsCount}
+            </small>
+          </div>
+        ))
+      )}
     </div>
   );
-};
+}
 
 export default Feed;
+
